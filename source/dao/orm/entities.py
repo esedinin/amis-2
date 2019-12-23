@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, Boolean, ForeignKeyConstraint
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, ForeignKeyConstraint
 from sqlalchemy.orm import relationship
 import datetime
 
@@ -21,6 +21,7 @@ class Group(Base):
 
     group_id = Column(Integer, primary_key=True)
     group_name = Column(String(255), nullable=False, unique=True)
+    student = relationship("Student", back_populates="Group")
 
 
 class Discipline(Base):
