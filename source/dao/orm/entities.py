@@ -12,7 +12,7 @@ class Student(Base):
     student_id = Column(Integer, primary_key=True)
     student_university = Column(String(255), nullable=False)
     student_faculty = Column(String(255), nullable=False)
-    student_group = Column(String(255), ForeignKey('Group.group_name'), nullable=False)
+    student_group = Column(String(255), ForeignKey('Group.group_name'), nullable=False, unique=True)
     student_name = Column(String(255), nullable=False)
     house_id = Column(Integer, nullable=True)
 
