@@ -20,7 +20,7 @@ class Group(Base):
     __tablename__ = 'Group'
 
     group_id = Column(Integer, primary_key=True)
-    group_name = Column(String(255), nullable=False)
+    group_name = Column(String(255), nullable=False, unique=True)
 
 
 class Discipline(Base):
