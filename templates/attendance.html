@@ -1,0 +1,48 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">student id</th> {# try without showing attendance_id #}
+            <th scope="col">class id</th>
+            <th scope="col">attended</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for attendance in attendances%}
+        <tr>
+            <td> {{attendance.student_id}}</td>
+            <td> {{attendance.class_id}}</td>
+            <td> {{attendance.attended}}</td>
+            <td>
+                <a href="/edit_attendance?attendance_id={{attendance.attendance_id}}" title="edit button">
+                    <button type="button" class="btn btn-warning" name="btn_edit_user" data-user_id="{{attendance.attendance_id}}">
+                        Edit
+                    </button>
+                </a>
+                <a href="/delete_attendance?attendance_id={{attendance.attendance_id}}" title="delete button">
+                    <button type="button" class="btn btn-danger" name="btn_delete_user" data-user_id="{{attendance.attendance_id}}">
+                        Delete
+                    </button>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td>
+                <a href="/new_attendance" title="new attendance button">
+                    <button type="button" class="btn btn-success" name="btn_new_attendance">New attendance</button>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!--<script src="{{ url_for('static', filename='js/skill.js') }}"></script>-->
+
+{% endblock %}

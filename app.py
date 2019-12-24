@@ -11,6 +11,7 @@ from source.forms.discipline_form import DisciplineForm
 from source.forms.house_form import HouseForm
 from source.forms.search_student_form import StudentSearchForm
 from source.forms.schedule_form import ScheduleForm
+from source.forms.attendance_form import AttendanceForm
 
 import json
 import plotly
@@ -434,8 +435,103 @@ def delete_schedule():
     return redirect(url_for('index_schedule'))
 
 
-# END SCHEDULE ORIENTED QUERIES ----------------------------------------------------------------------------------------
+# END SCHEDULE ORIENTED QUERIES -----------------------------------------------------------------------------------
+# ATTENDANCE ORIENTED QUERIES -----------------------------------------------------------------------------------
 
+
+@app.route('/attendance', methods=['GET'])
+def index_attendance():
+    db = PostgresDb()
+
+    deleted = request.args.get('deleted')
+
+    if deleted:
+        result = db.sqlalchemy_session.query(Attendance).all()
+    else:
+        result = db.sqlalchemy_session.query(Attendance).all()
+        deleted = False
+
+    return render_template('attendance.html', attendances=result, deleted=deleted)
+
+
+@app.route('/new_attendance', methods=['GET', 'POST'])
+def new_attendance():
+    form = AttendanceForm()
+    db = PostgresDb()
+
+    if request.method == 'POST':
+        if not form.validate():
+            return render_template('attendance_form.html', form=form, form_name="New attendance", action="new_attendance")
+        else:
+            id = list(db.sqlalchemy_session.query(func.max(Attendance.attendance_id)))[0][0]
+            attendance_obj = Attendance(
+                attendance_id=id + 1,
+                student_id=form.student_id.data,
+                class_id=form.class_id.data,
+                attended=form.attended.data)
+
+            db.sqlalchemy_session.add(attendance_obj)
+            db.sqlalchemy_session.commit()
+
+            return redirect(url_for('index_attendance'))
+
+    return render_template('attendance_form.html', form=form, form_name="New attendance", action="new_attendance")
+
+
+@app.route('/edit_attendance', methods=['GET', 'POST'])
+def edit_attendance():
+    form = AttendanceForm()
+
+    if request.method == 'GET':
+
+        attendance_id = request.args.get('attendance_id')
+        db = PostgresDb()
+        attendance = db.sqlalchemy_session.query(Attendance).filter(Attendance.attendance_id == attendance_id).one()
+
+        # fill form and send to attendance
+        form.attendance_id.data = attendance.attendance_id
+        form.student_id.data = attendance.student_id
+        form.class_id.data = attendance.class_id
+        form.attended.data = attendance.attended
+
+        return render_template('attendance_form.html', form=form, form_name="Edit attendance", action="edit_attendance")
+
+    else:
+
+        if not form.validate():
+            return render_template('attendance_form.html', form=form, form_name="Edit attendance", action="edit_attendance")
+        else:
+            db = PostgresDb()
+            # find attendance
+            attendance = db.sqlalchemy_session.query(Attendance).filter(Attendance.attendance_id == form.attendance_id.data).one()
+
+            # update fields from form data
+            attendance.attendance_id = form.attendance_id.data
+            attendance.student_id = form.student_id.data
+            attendance.class_id = form.class_id.data
+            attendance.attended = form.attended.data
+
+            db.sqlalchemy_session.commit()
+
+            return redirect(url_for('index_attendance'))
+
+
+@app.route('/delete_attendance')
+def delete_attendance():
+    attendance_id = request.args.get('attendance_id')
+
+    db = PostgresDb()
+
+    result = db.sqlalchemy_session.query(Attendance).filter(Attendance.attendance_id == attendance_id).one()
+    # result.student_date_expelled = date.today() TODO delete this if acceptable
+
+    db.sqlalchemy_session.delete(result)
+    db.sqlalchemy_session.commit()
+
+    return redirect(url_for('index_attendance'))
+
+
+# END ATTENDANCE ORIENTED QUERIES -----------------------------------------------------------------------------------
 # HOUSE ORIENTED QUERIES --------------------------------------------------------------------------------------------
 
 

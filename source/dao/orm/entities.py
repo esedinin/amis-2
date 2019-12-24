@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 
 
 Base = declarative_base()
@@ -28,7 +28,7 @@ class Discipline(Base):
 
     discipline_id = Column(Integer, primary_key=True)
     discipline_name = Column(String(255), nullable=False, unique=True)
-    discipline_group = Column(String(255), nullable=False)
+    discipline_group = Column(String(255), ForeignKey('Group.group_name'), nullable=False)
 
 
 class Schedule(Base):
@@ -38,6 +38,15 @@ class Schedule(Base):
     discipline_id = Column(Integer, ForeignKey('Discipline.discipline_id'), nullable=False)
     lecture_hall = Column(String(255), nullable=True)
     class_date = Column(Date, nullable=False)
+
+
+class Attendance(Base):
+    __tablename__ = 'Attendance'
+
+    attendance_id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey('Student.student_id'))
+    class_id = Column(Integer, ForeignKey('Schedule.class_id'))
+    attended = Column(Boolean, nullable=False)
 
 
 class House(Base):
