@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean, MetaData
 from sqlalchemy.orm import relationship
 
 
@@ -21,9 +21,9 @@ class Student(Base):
     group_id = Column(Integer, ForeignKey('Group.group_id'))
     student_university = Column(String(255), nullable=False)
     student_faculty = Column(String(255), nullable=False)
-    # student_group = Column(String(255), nullable=False)
     student_name = Column(String(255), nullable=False)
     house_id = Column(Integer, nullable=True)
+    student_group = Column(String(255), nullable=False)
 
 
 class Discipline(Base):
@@ -66,7 +66,11 @@ if __name__ == '__main__':
     from source.dao.db import PostgresDb
 
     db = PostgresDb()
-    Base.metadata.create_all(db.sqlalchemy_engine)
+    metadata = MetaData()
+
+    print("creating db")
+    print(Base.metadata.create_all(db.sqlalchemy_engine))
+    print("created?")
     # simple query test
     q1 = db.sqlalchemy_session.query(Group).all()
     q2 = db.sqlalchemy_session.query(Student).all()
