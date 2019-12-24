@@ -7,6 +7,8 @@ from datetime import date
 class StudentForm(Form):
     student_id = HiddenField()
 
+    group_id = HiddenField()
+
     student_name = StringField("name: ", [
         validators.DataRequired("Please enter student name."),
         validators.Length(3, 255, "Name should be from 3 to 255 symbols")

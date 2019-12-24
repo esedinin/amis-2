@@ -18,7 +18,7 @@ class Student(Base):
     __tablename__ = 'Student'
 
     student_id = Column(Integer, primary_key=True)
-    group_id = Column(Integer,  ForeignKey('Group.group_id'))
+    group_id = Column(Integer, ForeignKey('Group.group_id'))
     student_university = Column(String(255), nullable=False)
     student_faculty = Column(String(255), nullable=False)
     student_group = Column(String(255), nullable=False)

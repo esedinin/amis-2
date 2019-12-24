@@ -9,14 +9,16 @@ Base.metadata.create_all(db.sqlalchemy_engine)
 
 session = db.sqlalchemy_session
 
-session.query(Group).delete()
-session.query(Student).delete()
-session.query(Discipline).delete()
-session.query(Schedule).delete()
 session.query(Attendance).delete()
+session.query(Schedule).delete()
+session.query(Discipline).delete()
+session.query(Student).delete()
 session.query(House).delete()
+session.query(Group).delete()
 
-Sedinin = Student(student_id=1, student_university='KPI', student_faculty='FPM', student_group='KM-62', student_name='Sedinin Yehor', house_id=None)
+Sedinin = Student(student_id=1, group_id=1, student_university='KPI', student_faculty='FPM', student_group='KM-62', student_name='Sedinin Yehor', house_id=None)
+
+km_62 = Group(group_id=1, group_name='KM-62')
 
 
 # pop = genre(id=1, name='pop', psychotype='gipertim')
@@ -47,6 +49,6 @@ Sedinin = Student(student_id=1, student_university='KPI', student_faculty='FPM',
 # kovt1912 = wish(id=2, student_id=4, wish_date=datetime.date(2019, 12, 19), wish_performer='', wish_melody=3,wish_genre=1)
 # paly1812 = wish(id=3, student_id=5, wish_date=datetime.date(2019, 12, 18), wish_performer='', wish_melody=2,wish_genre=6)
 # kube1612 = wish(id=4, student_id=7, wish_date=datetime.date(2019, 12, 16), wish_performer='', wish_melody=2,wish_genre=6)
-session.add_all([Sedinin])
+session.add_all([Sedinin, km_62])
 
 session.commit()
