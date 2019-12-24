@@ -14,7 +14,7 @@ session.query(Student).delete()
 session.query(House).delete()
 session.query(Group).delete()
 
-Sedinin = Student(student_id=1, group_id=1, student_university='KPI', student_faculty='FPM', student_group='KM-62', student_name='Sedinin Yehor', house_id=None)
+Sedinin = Student(student_id=1, group_id=1, student_university='KPI', student_faculty='FPM', student_name='Sedinin Yehor', house_id=None)
 
 km_62 = Group(group_id=1, group_name='KM-62')
 
