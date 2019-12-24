@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from source.dao.orm.entities import *
+from source.dao.orm.populate import *
 from source.dao.db import PostgresDb
 from datetime import date
 from source.dao.data import *
@@ -17,8 +18,6 @@ import json
 import plotly
 import plotly.graph_objs as go
 import os
-
-from source.dao.orm.populate import *
 
 db = PostgresDb()
 Base.metadata.create_all(db.sqlalchemy_engine)

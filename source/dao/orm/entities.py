@@ -21,7 +21,7 @@ class Student(Base):
     group_id = Column(Integer, ForeignKey('Group.group_id'))
     student_university = Column(String(255), nullable=False)
     student_faculty = Column(String(255), nullable=False)
-    student_group = Column(String(255), nullable=False)
+    # student_group = Column(String(255), nullable=False)
     student_name = Column(String(255), nullable=False)
     house_id = Column(Integer, nullable=True)
 
@@ -66,10 +66,10 @@ if __name__ == '__main__':
     from source.dao.db import PostgresDb
 
     db = PostgresDb()
+    Base.metadata.create_all(db.sqlalchemy_engine)
     # simple query test
     q1 = db.sqlalchemy_session.query(Group).all()
     q2 = db.sqlalchemy_session.query(Student).all()
     q3 = db.sqlalchemy_session.query(Discipline).all()
 
-    # a = db.sqlalchemy_session.query(Student).join(Group).join(Discipline).all()
     print()

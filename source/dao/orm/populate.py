@@ -1,5 +1,3 @@
-import datetime
-
 from source.dao.orm.entities import *
 from source.dao.db import PostgresDb
 
