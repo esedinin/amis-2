@@ -18,6 +18,7 @@ session.query(Group).delete()
 Sedinin = Student(student_id=1, group_id=1, student_university='KPI', student_faculty='FPM', student_group="KM-62", student_name='Sedinin Yehor', house_id=None)
 
 km_62 = Group(group_id=1, group_name='KM-62')
+km_61 = Group(group_id=2, group_name='KM-61')
 
 
 # pop = genre(id=1, name='pop', psychotype='gipertim')
