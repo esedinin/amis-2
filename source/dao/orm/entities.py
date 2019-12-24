@@ -1,7 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, ForeignKeyConstraint
-from sqlalchemy.orm import relationship
-import datetime
+from sqlalchemy import Column, Integer, String, ForeignKey
+
 
 Base = declarative_base()
 
@@ -12,7 +11,7 @@ class Student(Base):
     student_id = Column(Integer, primary_key=True)
     student_university = Column(String(255), nullable=False)
     student_faculty = Column(String(255), nullable=False)
-    student_group = Column(String(255), ForeignKey('Group.group_name'), nullable=False, unique=True)
+    student_group = Column(String(255), ForeignKey('Group.group_name'), nullable=False)
     student_name = Column(String(255), nullable=False)
     house_id = Column(Integer, nullable=True)
 
@@ -20,8 +19,7 @@ class Group(Base):
     __tablename__ = 'Group'
 
     group_id = Column(Integer, primary_key=True)
-    group_name = Column(String(255), nullable=False, unique=True)
-    student = relationship("Student", back_populates="Group")
+    group_name = Column(String(255), nullable=False)
 
 
 class Discipline(Base):
@@ -41,6 +39,7 @@ class House(Base):
     floor_count = Column(Integer, nullable=False)
     year = Column(Integer, nullable=False)
 
+#TEST COMMIT
 
 if __name__ == '__main__':
     from source.dao.db import PostgresDb

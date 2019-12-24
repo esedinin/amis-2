@@ -16,9 +16,10 @@ import os
 
 db = PostgresDb()
 
-Base.metadata.create_all(db.sqlalchemy_engine)
+# TODO create tables in heroku
+# Base.metadata.create_all(db.sqlalchemy_engine)
+# session = db.sqlalchemy_session
 
-session = db.sqlalchemy_session
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "jkm-vsnej9l-vm9sqm3:lmve")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL",
