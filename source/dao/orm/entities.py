@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Date
 
 
 Base = declarative_base()
@@ -15,19 +15,29 @@ class Student(Base):
     student_name = Column(String(255), nullable=False)
     house_id = Column(Integer, nullable=True)
 
+
 class Group(Base):
     __tablename__ = 'Group'
 
     group_id = Column(Integer, primary_key=True)
-    group_name = Column(String(255), nullable=False)
+    group_name = Column(String(255), nullable=False, unique=True)
 
 
 class Discipline(Base):
     __tablename__ = 'Discipline'
 
     discipline_id = Column(Integer, primary_key=True)
-    discipline_name = Column(String(255), nullable=False)
+    discipline_name = Column(String(255), nullable=False, unique=True)
     discipline_group = Column(String(255), nullable=False)
+
+
+class Schedule(Base):
+    __tablename__ = 'Schedule'
+
+    class_id = Column(Integer, primary_key=True)
+    discipline_id = Column(Integer, ForeignKey('Discipline.discipline_id'), nullable=False)
+    lecture_hall = Column(String(255), nullable=True)
+    class_date = Column(Date, nullable=False)
 
 
 class House(Base):
@@ -39,7 +49,6 @@ class House(Base):
     floor_count = Column(Integer, nullable=False)
     year = Column(Integer, nullable=False)
 
-#TEST COMMIT
 
 if __name__ == '__main__':
     from source.dao.db import PostgresDb

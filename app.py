@@ -4,11 +4,14 @@ from source.dao.db import PostgresDb
 from datetime import date
 from source.dao.data import *
 from sqlalchemy import func
+
 from source.forms.student_form import StudentForm
 from source.forms.group_form import GroupForm
 from source.forms.discipline_form import DisciplineForm
 from source.forms.house_form import HouseForm
 from source.forms.search_student_form import StudentSearchForm
+from source.forms.schedule_form import ScheduleForm
+
 import json
 import plotly
 import plotly.graph_objs as go
@@ -335,9 +338,105 @@ def delete_discipline():
     return redirect(url_for('index_discipline'))
 
 
-# END discipline ORIENTED QUERIES ----------------------------------------------------------------------------------------
+# END discipline ORIENTED QUERIES ----------------------------------------------------------------------------
+# SCHEDULE ORIENTED QUERIES --------------------------------------------------------------------------------------------
 
-# STUDENT ORIENTED QUERIES --------------------------------------------------------------------------------------------
+
+@app.route('/schedule', methods=['GET'])
+def index_schedule():
+    db = PostgresDb()
+
+    deleted = request.args.get('deleted')
+
+    if deleted:
+        result = db.sqlalchemy_session.query(Schedule).all()
+    else:
+        result = db.sqlalchemy_session.query(Schedule).all()
+        deleted = False
+
+    return render_template('schedule.html', schedules=result, deleted=deleted)
+
+
+@app.route('/new_schedule', methods=['GET', 'POST'])
+def new_schedule():
+    form = ScheduleForm()
+    db = PostgresDb()
+
+    if request.method == 'POST':
+        if not form.validate():
+            return render_template('schedule_form.html', form=form, form_name="New schedule", action="new_schedule")
+        else:
+            id = list(db.sqlalchemy_session.query(func.max(Schedule.class_id)))[0][0]
+            schedule_obj = Schedule(
+                class_id=id + 1,
+                discipline_id=form.discipline_id.data,
+                lecture_hall=form.lecture_hall.data,
+                class_date=form.class_date.data)
+
+            db.sqlalchemy_session.add(schedule_obj)
+            db.sqlalchemy_session.commit()
+
+            return redirect(url_for('index_schedule'))
+
+    return render_template('schedule_form.html', form=form, form_name="New schedule", action="new_schedule")
+
+
+@app.route('/edit_schedule', methods=['GET', 'POST'])
+def edit_schedule():
+    form = ScheduleForm()
+
+    if request.method == 'GET':
+
+        class_id = request.args.get('class_id')
+        db = PostgresDb()
+        schedule = db.sqlalchemy_session.query(Schedule).filter(Schedule.class_id == class_id).one()
+
+        # fill form and send to schedule
+        form.class_id.data = schedule.class_id
+        form.discipline_id.data = schedule.discipline_id
+        form.lecture_hall.data = schedule.lecture_hall
+        form.class_date.data = schedule.class_date
+
+        return render_template('schedule_form.html', form=form, form_name="Edit schedule", action="edit_schedule")
+
+    else:
+
+        if not form.validate():
+            return render_template('schedule_form.html', form=form, form_name="Edit schedule", action="edit_schedule")
+        else:
+            db = PostgresDb()
+            # find schedule
+            schedule = db.sqlalchemy_session.query(Schedule).filter(Schedule.class_id == form.class_id.data).one()
+
+            # update fields from form data
+            schedule.class_id = form.class_id.data
+            schedule.discipline_id = form.discipline_id.data
+            schedule.lecture_hall = form.lecture_hall.data
+            schedule.class_date = form.class_date.data
+
+            db.sqlalchemy_session.commit()
+
+            return redirect(url_for('index_schedule'))
+
+
+@app.route('/delete_schedule')
+def delete_schedule():
+    class_id = request.args.get('class_id')
+
+    db = PostgresDb()
+
+    result = db.sqlalchemy_session.query(Schedule).filter(Schedule.class_id == class_id).one()
+    # result.student_date_expelled = date.today() TODO delete this if acceptable
+
+    db.sqlalchemy_session.delete(result)
+    db.sqlalchemy_session.commit()
+
+    return redirect(url_for('index_schedule'))
+
+
+# END SCHEDULE ORIENTED QUERIES ----------------------------------------------------------------------------------------
+
+# HOUSE ORIENTED QUERIES --------------------------------------------------------------------------------------------
 
 
 @app.route('/house', methods=['GET'])
@@ -434,7 +533,7 @@ def delete_house():
     return redirect(url_for('index_house'))
 
 
-# END STUDENT ORIENTED QUERIES ----------------------------------------------------------------------------------------
+# END HOUSE ORIENTED QUERIES ----------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     app.run(debug=True)
