@@ -18,9 +18,10 @@ class Student(Base):
     __tablename__ = 'Student'
 
     student_id = Column(Integer, primary_key=True)
+    group_id = Column(Integer,  ForeignKey('Group.group_id'))
     student_university = Column(String(255), nullable=False)
     student_faculty = Column(String(255), nullable=False)
-    student_group = Column(String(255), ForeignKey('Group.group_name'), nullable=False)
+    # student_group = Column(String(255), ForeignKey('Group.group_name'), nullable=False)
     student_name = Column(String(255), nullable=False)
     house_id = Column(Integer, nullable=True)
 
