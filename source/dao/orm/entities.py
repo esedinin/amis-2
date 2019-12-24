@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean, MetaData
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean, MetaData, Table
 from sqlalchemy.orm import relationship
 
 
@@ -66,11 +66,9 @@ if __name__ == '__main__':
     from source.dao.db import PostgresDb
 
     db = PostgresDb()
-    metadata = MetaData()
-
-    print("creating db")
-    print(Base.metadata.create_all(db.sqlalchemy_engine))
-    print("created?")
+    # Base.metadata.drop_all(db.sqlalchemy_engine)
+    # Base.metadata.create_all(db.sqlalchemy_engine)
+    print("Entities running")
     # simple query test
     q1 = db.sqlalchemy_session.query(Group).all()
     q2 = db.sqlalchemy_session.query(Student).all()

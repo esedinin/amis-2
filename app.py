@@ -20,7 +20,7 @@ import plotly.graph_objs as go
 import os
 
 db = PostgresDb()
-Base.metadata.create_all(db.sqlalchemy_engine)
+# Base.metadata.create_all(db.sqlalchemy_engine)
 
 
 app = Flask(__name__)
@@ -631,4 +631,9 @@ def delete_house():
 # END HOUSE ORIENTED QUERIES ----------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
+    # print(Base.metadata)
+    #
+    # print("creating db")
+    # print(Base.metadata.create_all(db.sqlalchemy_engine))
+    # print("created?")
     app.run(debug=True)
