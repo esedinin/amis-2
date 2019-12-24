@@ -20,9 +20,8 @@ import os
 
 db = PostgresDb()
 
-# TODO create tables in heroku
-# Base.metadata.create_all(db.sqlalchemy_engine)
-# session = db.sqlalchemy_session
+Base.metadata.create_all(db.sqlalchemy_engine)
+session = db.sqlalchemy_session
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "jkm-vsnej9l-vm9sqm3:lmve")
@@ -288,7 +287,7 @@ def new_discipline():
     return render_template('discipline_form.html', form=form, form_name="New discipline", action="new_discipline")
 
 
-@app.route('/discipline', methods=['GET', 'POST'])
+@app.route('/edit_discipline', methods=['GET', 'POST'])
 def edit_discipline():
     form = DisciplineForm()
 
