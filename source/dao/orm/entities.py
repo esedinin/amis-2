@@ -25,6 +25,7 @@ class Student(Base):
     student_name = Column(String(255), nullable=False)
     house_id = Column(Integer, nullable=True)
     student_group = Column(String(255), nullable=False)
+    attendances = relationship("Attendance")
 
 
 class Discipline(Base):
@@ -33,6 +34,7 @@ class Discipline(Base):
     discipline_id = Column(Integer, primary_key=True)
     discipline_name = Column(String(255), nullable=False, unique=True)
     discipline_group = Column(String(255), ForeignKey('Group.group_name'), nullable=False)
+    schedules = relationship("Schedule")
 
 
 class Schedule(Base):
@@ -42,6 +44,7 @@ class Schedule(Base):
     discipline_id = Column(Integer, ForeignKey('Discipline.discipline_id'), nullable=False)
     lecture_hall = Column(String(255), nullable=True)
     class_date = Column(Date, nullable=False)
+    attendances = relationship("Attendance")
 
 
 class Attendance(Base):
