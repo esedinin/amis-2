@@ -1,5 +1,6 @@
 from source.dao.orm.entities import *
 from source.dao.db import PostgresDb
+import datetime
 
 db = PostgresDb()
 
@@ -15,40 +16,37 @@ session.query(Student).delete()
 session.query(House).delete()
 session.query(Group).delete()
 
-Sedinin = Student(student_id=1, group_id=1, student_university='KPI', student_faculty='FPM', student_group="KM-62", student_name='Sedinin Yehor', house_id=None)
 
 km_62 = Group(group_id=1, group_name='KM-62')
 km_61 = Group(group_id=2, group_name='KM-61')
+kv_61 = Group(group_id=3, group_name='KV-61')
+kp_73 = Group(group_id=4, group_name='KP-73')
 
+Sedinin = Student(student_id=1, group_id=1, student_university='KPI', student_faculty='FPM', student_group="KM-62", student_name='Sedinin Yehor', house_id=None)
+Pavlov = Student(student_id=2, group_id=1, student_university='KPI', student_faculty='FPM', student_group="KM-62", student_name='Pavlov Pavlo', house_id=None)
+Ivanov = Student(student_id=3, group_id=1, student_university='KPI', student_faculty='FPM', student_group="KM-62", student_name='Ivanov Ivan', house_id=None)
+Antonov = Student(student_id=4, group_id=2, student_university='KPI', student_faculty='FPM', student_group="KM-61", student_name='Antonov Anton', house_id=None)
+Testov = Student(student_id=5, group_id=3, student_university='KPI', student_faculty='FPM', student_group="KV-61", student_name='Testov Test', house_id=None)
+Vovov = Student(student_id=6, group_id=4, student_university='NAU', student_faculty='HMM', student_group="KP-73", student_name='Vovov Vova', house_id=None)
 
-# pop = genre(id=1, name='pop', psychotype='gipertim')
-# indie = genre(id=2, name='indie', psychotype='emotive')
-# rock = genre(id=3, name='rock', psychotype='isteroid')
-# romans = genre(id=4, name='romans', psychotype='disturbing')
-# classic = genre(id=5, name='classic', psychotype='PSYCHASTENOID')
-# blues = genre(id=6, name='blues', psychotype='emotive')
-# jazz = genre(id=7, name='jazz', psychotype='gipertim')
-#
-# Elzy = performer(id=1, name='Okean Elzy')
-# Hardkiss = performer(id=2, name='The Hardkiss')
-# Babkin = performer(id=3, name='Serhii Babkin')
-# Zemfira = performer(id=4, name='Zemfira')
-# Jackson = performer(id=5, name='Michael Jackson')
-#
-# no_album1 = album(id=0, title='Blues', performer_id=4)
-# Zemlya = album(id=1, title='Zemlya', performer_id=1)
-# Closer = album(id=2, title='Closer', performer_id=2)
-# Muzasfera = album(id=3, title='Muzasfera', performer_id=3)
-# no_album2 = album(id=4, title='Smooth Criminal', performer_id=5)
-#
-# Prirva = melody(id=1, title='Prirva', singer='The Hardkiss', release_date=datetime.date(2016, 4, 19), melody_genre=4,album_id=2)
-# Blues = melody(id=2, title='Blues', singer='Zemfira', release_date=datetime.date(2009, 12, 30), melody_genre=6,album_id=0)
-# Criminal = melody(id=3, title='Smooth Criminal', singer='Michael Jackson', release_date=datetime.date(1997, 11, 5), melody_genre=1,album_id=4)
-#
-# atam1912 = wish(id=1, student_id=1, wish_date=datetime.date(2019, 12, 19), wish_performer='Zemfira', wish_melody=2,wish_genre=6)
-# kovt1912 = wish(id=2, student_id=4, wish_date=datetime.date(2019, 12, 19), wish_performer='', wish_melody=3,wish_genre=1)
-# paly1812 = wish(id=3, student_id=5, wish_date=datetime.date(2019, 12, 18), wish_performer='', wish_melody=2,wish_genre=6)
-# kube1612 = wish(id=4, student_id=7, wish_date=datetime.date(2019, 12, 16), wish_performer='', wish_melody=2,wish_genre=6)
-session.add_all([Sedinin, km_62])
+Math = Discipline(discipline_id=1, discipline_name='Math', discipline_group='KM-62')
+DB = Discipline(discipline_id=2, discipline_name='DB', discipline_group='KM-61')
+AI = Discipline(discipline_id=3, discipline_name='AI', discipline_group='KV-61')
+DS = Discipline(discipline_id=4, discipline_name='DS', discipline_group='KP-73')
+
+Math1 = Schedule(class_id=1, discipline_id=1, class_date=datetime.date(2019, 12, 25), lecture_hall='209-19')
+Math2 = Schedule(class_id=2, discipline_id=1, class_date=datetime.date(2019, 12, 29), lecture_hall='209-19')
+DB1 = Schedule(class_id=3, discipline_id=2, class_date=datetime.date(2019, 12, 25), lecture_hall='105-07')
+
+Math1Sedinin = Attendance(attendance_id=1, class_id=1, student_id=1, attended=True)
+Math1Pavlov = Attendance(attendance_id=2, class_id=1, student_id=2, attended=True)
+Math1Ivanov = Attendance(attendance_id=3, class_id=1, student_id=3, attended=False)
+Math2Sedinin = Attendance(attendance_id=4, class_id=2, student_id=1, attended=False)
+Math2Pavlov = Attendance(attendance_id=5, class_id=2, student_id=2, attended=True)
+Math2Ivanov = Attendance(attendance_id=6, class_id=2, student_id=3, attended=False)
+DB1Antonov = Attendance(attendance_id=7, class_id=3, student_id=4, attended=True)
+
+session.add_all([km_61, km_62, kv_61, kp_73, Sedinin, Pavlov, Ivanov, Antonov, Testov, Vovov, Math, DB, AI, DS, Math1,
+                 Math2, DB1, Math1Sedinin, Math1Pavlov, Math1Ivanov, Math2Sedinin, Math2Pavlov, Math2Ivanov, DB1Antonov])
 
 session.commit()
