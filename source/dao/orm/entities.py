@@ -79,8 +79,8 @@ if __name__ == '__main__':
     from source.dao.db import PostgresDb
 
     db = PostgresDb()
-    Base.metadata.drop_all(db.sqlalchemy_engine)
-    Base.metadata.create_all(db.sqlalchemy_engine)
+    # Base.metadata.drop_all(db.sqlalchemy_engine)
+    # Base.metadata.create_all(db.sqlalchemy_engine)
     print("Entities running")
     # simple query test
     q1 = db.sqlalchemy_session.query(Group).all()
