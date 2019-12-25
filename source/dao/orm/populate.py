@@ -9,6 +9,8 @@ Base.metadata.create_all(db.sqlalchemy_engine)
 
 session = db.sqlalchemy_session
 
+# TODO deleting all db after every deploy is not really good
+
 session.query(Attendance).delete()
 session.query(Schedule).delete()
 session.query(Discipline).delete()
