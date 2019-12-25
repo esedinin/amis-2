@@ -10,7 +10,7 @@ class Group(Base):
     __tablename__ = 'Group'
 
     group_id = Column(Integer, primary_key=True)
-    group_name = Column(String(255), nullable=False) #should it be unique?
+    group_name = Column(String(255), nullable=False, unique=True)
     students = relationship("Student")
     disciplines = relationship("Discipline") #can break something
 
