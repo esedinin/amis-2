@@ -10,9 +10,10 @@ class Group(Base):
     __tablename__ = 'Group'
 
     group_id = Column(Integer, primary_key=True)
-    group_name = Column(String(255), nullable=False, unique=True)
+    group_name = Column(String(255), nullable=False, index=True, unique=True)
+
     students = relationship("Student")
-    disciplines = relationship("Discipline") #can break something
+    disciplines = relationship("Discipline")
 
 
 class Student(Base):
@@ -22,9 +23,10 @@ class Student(Base):
     group_id = Column(Integer, ForeignKey('Group.group_id'))
     student_university = Column(String(255), nullable=False)
     student_faculty = Column(String(255), nullable=False)
-    student_name = Column(String(255), nullable=False)
+    student_name = Column(String(255), nullable=False, index=True, unique=True)
     house_id = Column(Integer, nullable=True)
     student_group = Column(String(255), nullable=False)
+
     attendances = relationship("Attendance")
 
 
@@ -32,8 +34,10 @@ class Discipline(Base):
     __tablename__ = 'Discipline'
 
     discipline_id = Column(Integer, primary_key=True)
-    discipline_name = Column(String(255), nullable=False, unique=True)
-    discipline_group = Column(String(255), ForeignKey('Group.group_name'), nullable=False)
+    group_id = Column(Integer, ForeignKey('Group.group_id'))
+    discipline_name = Column(String(255), nullable=False, index=True, unique=True)
+    discipline_group = Column(String(255), nullable=False)
+
     schedules = relationship("Schedule")
 
 
@@ -42,8 +46,10 @@ class Schedule(Base):
 
     class_id = Column(Integer, primary_key=True)
     discipline_id = Column(Integer, ForeignKey('Discipline.discipline_id'), nullable=False)
+    discipline_name = Column(String(255), nullable=False)
     lecture_hall = Column(String(255), nullable=True)
     class_date = Column(Date, nullable=False)
+
     attendances = relationship("Attendance")
 
 
@@ -52,7 +58,10 @@ class Attendance(Base):
 
     attendance_id = Column(Integer, primary_key=True)
     student_id = Column(Integer, ForeignKey('Student.student_id'))
+    student_name = Column(String(255), nullable=False)
     class_id = Column(Integer, ForeignKey('Schedule.class_id'))
+    discipline_name = Column(String(255), nullable=False)
+    class_date = Column(Date, nullable=False)
     attended = Column(Boolean, nullable=False)
 
 

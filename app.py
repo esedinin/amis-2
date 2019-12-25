@@ -4,15 +4,19 @@ from source.dao.orm.populate import *
 from source.dao.db import PostgresDb
 from datetime import date
 from source.dao.data import *
-from sqlalchemy import func
+from sqlalchemy import func, and_
 
-from source.forms.student_form import *#StudentForm, update_groups_list
+import plotly
+import plotly.graph_objects as go
+
+from source.forms.student_form import *
 from source.forms.group_form import GroupForm
 from source.forms.discipline_form import *
 from source.forms.house_form import HouseForm
 from source.forms.search_student_form import StudentSearchForm
 from source.forms.schedule_form import ScheduleForm
 from source.forms.attendance_form import AttendanceForm
+from source.forms.search_form import SearchForm
 
 import json
 import plotly
@@ -34,31 +38,62 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 def root():
     return render_template('index.html')
 
+@app.route('/try', methods=['POST', 'GET'])
+def some_query():
+    form = SearchForm()
+    if request.method == 'POST':
+        if not form.validate():
+            return render_template("search_by_group.html", form=form, action="try", form_name="Search students")
+        else:
+            group_parameter = form.group.data
+            print(group_parameter)
+            result = db.sqlalchemy_session.query(Group.group_name, func.count(Discipline.discipline_name))\
+                .join(Group, Group.group_name == Discipline.discipline_group).\
+                join(Student, Student.group_id == Group.group_id).group_by(Group.group_name)
+            # .filter(Student.student_group == group_parameter)\ try without filter
+            #TODO I NEED TO FILTER BY STUDENT
+            result2 = db.sqlalchemy_session.query(Discipline.discipline_name, func.count(Student.student_id).filter(Attendance.attended))\
+                .join(Schedule, Discipline.discipline_id == Schedule.discipline_id).\
+                join(Attendance, Schedule.class_id == Attendance.class_id).\
+                join(Student, Student.student_id == Attendance.student_id).group_by(Discipline.discipline_name)\
+                .filter(Student.student_group == group_parameter)
 
-@app.route('/dashboard', methods=['GET', 'POST'])
-def dashboard():
-    pie_labels = []
-    data = {}
+            for row in result2:
+                print(row)
+            disciplines = dict((group, count) for group, count in result2)
+            print(disciplines)
+            disciplines_invert = dict((count, group) for group, count in result2)
+            print(disciplines_invert)
+            maxkey = disciplines_invert[max(disciplines.values())]
+            print(max(disciplines.values()), 'and its key ', maxkey)
 
-    # pie plot -------------------------------------------------------------------------------------------------------
-    student_form = StudentSearchForm()
-    student_form.init()
+            x = []
+            y = []
+            for a in disciplines.keys():
+                x.append(a)
+            for b in disciplines.values():
+                y.append(b)
+            x.append('Total classes per student')
+            print(x)
+            for row in db.sqlalchemy_session.query(func.count(Student.student_id))\
+                .join(Attendance, Student.student_id == Attendance.student_id).filter(Student.student_group == group_parameter):
 
-    for query, label in zip(*student_form.search(method=request.method)):
+                y.append(row[0])
+            print(y)
+            data = [
+                go.Bar(
+                    x=x,  # assign x as the dataframe column 'x'
+                    y=y
+                )
+            ]
 
-        if not query:
-            continue
+            graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 
-        groups, counts = zip(*query)
-        pie = go.Pie(
-            labels=[f'group = {group}' for group in groups],
-            values=counts
-        )
-        data[label] = [pie]
-        pie_labels.append(label)
-    json_data = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+            bar = graphJSON
+            return render_template('graphics.html', plot=bar, group=group_parameter)
 
-    return render_template('dashboard.html', json=json_data, pie_labels=pie_labels, student_form=student_form)
+    return render_template("search_by_group.html", form=form, action="try", form_name="Serach disciplines in groups")
+
 
 # STUDENT ORIENTED QUERIES --------------------------------------------------------------------------------------------
 
@@ -80,17 +115,16 @@ def index_student():
 
 @app.route('/new_student', methods=['GET', 'POST'])
 def new_student():
-    ch = update_groups_list()
     form = StudentForm()
     db = PostgresDb()
-
     if request.method == 'POST':
         if not form.validate():
             return render_template('student_form.html', form=form, form_name="New student", action="new_student")
         else:
             id = list(db.sqlalchemy_session.query(func.max(Student.student_id)))[0][0]
             student_obj = Student(
-                student_id = id  + 1,
+                student_id=id+1,
+                group_id=db.sqlalchemy_session.query(Group.group_id).filter(Group.group_name == form.student_group.data),
                 student_university=form.student_university.data,
                 student_faculty=form.student_faculty.data,
                 student_group=form.student_group.data,
@@ -98,6 +132,7 @@ def new_student():
 
             db.sqlalchemy_session.add(student_obj)
             db.sqlalchemy_session.commit()
+            AttendanceForm.reload_students()
 
             return redirect(url_for('index_student'))
 
@@ -106,7 +141,6 @@ def new_student():
 
 @app.route('/edit_student', methods=['GET', 'POST'])
 def edit_student():
-    ch = update_groups_list()
     form = StudentForm()
 
     if request.method == 'GET':
@@ -134,13 +168,15 @@ def edit_student():
             student = db.sqlalchemy_session.query(Student).filter(Student.student_id == form.student_id.data).one()
 
             # update fields from form data
-            student.student_id = form.student_id.data
+            student.student_id = student.student_id
+            student.group_id = db.sqlalchemy_session.query(Group.group_id).filter(Group.group_name == form.student_group.data)
             student.student_university = form.student_university.data
             student.student_faculty = form.student_faculty.data
             student.student_group = form.student_group.data
             student.student_name = form.student_name.data
 
             db.sqlalchemy_session.commit()
+            AttendanceForm.reload_students()
 
             return redirect(url_for('index_student'))
 
@@ -156,6 +192,7 @@ def delete_student():
 
     db.sqlalchemy_session.delete(result)
     db.sqlalchemy_session.commit()
+    AttendanceForm.reload_students()
 
     return redirect(url_for('index_student'))
 
@@ -190,6 +227,9 @@ def new_group():
             db = PostgresDb()
             db.sqlalchemy_session.add(group_obj)
             db.sqlalchemy_session.commit()
+            StudentForm.reload_groups()
+            DisciplineForm.reload_groups()
+            SearchForm.reload_groups()
 
             return redirect(url_for('index_group'))
 
@@ -226,6 +266,9 @@ def edit_group():
             group.group_name = form.group_name.data
 
             db.sqlalchemy_session.commit()
+            StudentForm.reload_groups()
+            DisciplineForm.reload_groups()
+            SearchForm.reload_groups()
 
             return redirect(url_for('index_group'))
 
@@ -241,6 +284,9 @@ def delete_group():
 
     db.sqlalchemy_session.delete(result)
     db.sqlalchemy_session.commit()
+    StudentForm.reload_groups()
+    DisciplineForm.reload_groups()
+    SearchForm.reload_groups()
 
     return redirect(url_for('index_group'))
 
@@ -278,11 +324,13 @@ def new_discipline():
             id = list(db.sqlalchemy_session.query(func.max(Discipline.discipline_id)))[0][0]
             discipline_obj = Discipline(
                 discipline_id = id + 1,
+                group_id=db.sqlalchemy_session.query(Group.group_id).filter(Group.group_name==form.discipline_name.data),
                 discipline_group=form.discipline_group.data,
                 discipline_name=form.discipline_name.data)
 
             db.sqlalchemy_session.add(discipline_obj)
             db.sqlalchemy_session.commit()
+            AttendanceForm.reload_disciplines()
 
             return redirect(url_for('index_discipline'))
 
@@ -321,7 +369,7 @@ def edit_discipline():
             discipline.discipline_name = form.discipline_name.data
 
             db.sqlalchemy_session.commit()
-
+            AttendanceForm.reload_disciplines()
             return redirect(url_for('index_discipline'))
 
 
@@ -332,10 +380,10 @@ def delete_discipline():
     db = PostgresDb()
 
     result = db.sqlalchemy_session.query(Discipline).filter(Discipline.discipline_id == discipline_id).one()
-    result.discipline_date_expelled = date.today()
 
     db.sqlalchemy_session.delete(result)
     db.sqlalchemy_session.commit()
+    AttendanceForm.reload_disciplines()
 
     return redirect(url_for('index_discipline'))
 
@@ -363,7 +411,6 @@ def index_schedule():
 def new_schedule():
     form = ScheduleForm()
     db = PostgresDb()
-
     if request.method == 'POST':
         if not form.validate():
             return render_template('schedule_form.html', form=form, form_name="New schedule", action="new_schedule")
@@ -371,12 +418,13 @@ def new_schedule():
             id = list(db.sqlalchemy_session.query(func.max(Schedule.class_id)))[0][0]
             schedule_obj = Schedule(
                 class_id=id + 1,
-                discipline_id=form.discipline_id.data,
+                discipline_id=db.sqlalchemy_session.query(Discipline.discipline_id).filter(Discipline.discipline_name==form.discipline_name.data),
+                discipline_name=form.discipline_name.data,
                 lecture_hall=form.lecture_hall.data,
                 class_date=form.class_date.data)
-
             db.sqlalchemy_session.add(schedule_obj)
             db.sqlalchemy_session.commit()
+            AttendanceForm.reload_dates()
 
             return redirect(url_for('index_schedule'))
 
@@ -417,6 +465,7 @@ def edit_schedule():
             schedule.class_date = form.class_date.data
 
             db.sqlalchemy_session.commit()
+            AttendanceForm.reload_dates()
 
             return redirect(url_for('index_schedule'))
 
@@ -432,6 +481,7 @@ def delete_schedule():
 
     db.sqlalchemy_session.delete(result)
     db.sqlalchemy_session.commit()
+    AttendanceForm.reload_dates()
 
     return redirect(url_for('index_schedule'))
 
@@ -459,17 +509,23 @@ def index_attendance():
 def new_attendance():
     form = AttendanceForm()
     db = PostgresDb()
-
+    print(form.discipline_name.data)
     if request.method == 'POST':
         if not form.validate():
             return render_template('attendance_form.html', form=form, form_name="New attendance", action="new_attendance")
         else:
             id = list(db.sqlalchemy_session.query(func.max(Attendance.attendance_id)))[0][0]
             attendance_obj = Attendance(
-                attendance_id=id + 1,
-                student_id=form.student_id.data,
-                class_id=form.class_id.data,
+                attendance_id=id+1,
+                student_id=db.sqlalchemy_session.query(Student.student_id).filter(Student.student_name==form.student_name.data),
+                student_name=form.student_name.data,
+                class_id=db.sqlalchemy_session.query(Schedule.class_id).filter(and_(Schedule.discipline_name==form.discipline_name.data,Schedule.class_date==form.class_date.data )),
+                discipline_name=form.discipline_name.data,
+                class_date=form.class_date.data,
                 attended=form.attended.data)
+            print(attendance_obj)
+            print((attendance_obj.discipline_name))
+            print((attendance_obj.class_date ))
 
             db.sqlalchemy_session.add(attendance_obj)
             db.sqlalchemy_session.commit()
@@ -492,7 +548,10 @@ def edit_attendance():
         # fill form and send to attendance
         form.attendance_id.data = attendance.attendance_id
         form.student_id.data = attendance.student_id
+        form.student_name.data = attendance.student_name
         form.class_id.data = attendance.class_id
+        form.discipline_name.data = attendance.discipline_name
+        form.class_date.data = attendance.class_date
         form.attended.data = attendance.attended
 
         return render_template('attendance_form.html', form=form, form_name="Edit attendance", action="edit_attendance")
@@ -508,8 +567,10 @@ def edit_attendance():
 
             # update fields from form data
             attendance.attendance_id = form.attendance_id.data
-            attendance.student_id = form.student_id.data
-            attendance.class_id = form.class_id.data
+            attendance.student_id = db.sqlalchemy_session.query(Student.student_id).filter(Student.student_name == form.student_name.data),
+            attendance.student_name = form.student_name.data,
+            attendance.class_id = db.sqlalchemy_session.query(Schedule.class_id).filter(and_(Schedule.discipline_name == form.discipline_name, Schedule.class_date == form.class_date)),
+            attendance.discipline_name = form.discipline_name.data,
             attendance.attended = form.attended.data
 
             db.sqlalchemy_session.commit()
@@ -633,9 +694,4 @@ def delete_house():
 # END HOUSE ORIENTED QUERIES ----------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    # print(Base.metadata)
-    #
-    # print("creating db")
-    # print(Base.metadata.create_all(db.sqlalchemy_engine))
-    # print("created?")
     app.run(debug=True)

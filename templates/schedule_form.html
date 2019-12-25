@@ -20,14 +20,13 @@
             <form class="form"  action = "/{{action}}" method = post >
                 {{ form.hidden_tag() }}
 
-
                 <div class="form-group">
-                    {{ form.discipline_id.label }}
-                    {{ form.discipline_id(class_="form-control") }}
+                    {{ form.discipline_name.label }}
+                    {{ form.discipline_name(class_="form-control") }}
 
-                    {% if form.discipline_id.errors%}
+                    {% if form.discipline_name.errors%}
                     <div class="alert alert-danger" role="alert">
-                        {% for message in form.discipline_id.errors %}
+                        {% for message in form.class_date.errors %}
                         <div>{{ message }}</div>
                         {% endfor %}
                     </div>

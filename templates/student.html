@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 
 {% block content %}
-
+<meta http-equiv="cache-control" content="no-cache" />
 
 <div class="table-responsive">
     <table class="table">
@@ -24,7 +24,6 @@
             <td> {{student.student_faculty}}</td>
             <td> {{student.student_group}}</td>
             <td> {{student.student_name}}</td>
-{#            {% endif %}#}
             <td>
                 <a href="/edit_student?student_id={{student.student_id}}" title="edit button">
                     <button type="button" class="btn btn-warning" name="btn_edit_user" data-user_id="{{student.student_id}}">

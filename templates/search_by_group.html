@@ -1,12 +1,8 @@
-
-
 {% extends "index.html" %}
 
 {% block content %}
 
 <!--https://www.codeply.com/go/nhbdi2FkJm-->
-<meta http-equiv="cache-control" content="no-cache" />
-
 <div class="col-md-6 mx-auto">
 
     <!-- form card login -->
@@ -22,12 +18,12 @@
 
 
                 <div class="form-group">
-                    {{ form.group_name.label }}
-                    {{ form.group_name(class_="form-control") }}
+                    {{ form.group.label }}
+                    {{ form.group(class_="form-control") }}
 
-                    {% if form.group_name.errors%}
+                    {% if form.group.errors%}
                     <div class="alert alert-danger" role="alert">
-                        {% for message in form.group_name.errors %}
+                        {% for message in form.group.errors %}
                         <div>{{ message }}</div>
                         {% endfor %}
                     </div>
@@ -42,10 +38,5 @@
     <!-- /form card login -->
 
 </div>
-
-</div>
-
-
-
 
 {% endblock %}

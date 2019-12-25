@@ -7,8 +7,9 @@
     <table class="table">
         <thead>
         <tr>
-            <th scope="col">class id</th>
-            <th scope="col">discipline id</th>
+{#            <th scope="col">class id</th>#}
+{#            <th scope="col">discipline id</th>#}
+            <th scope="col">discipline name</th>
             <th scope="col">lecture hall</th>
             <th scope="col">class date</th>
         </tr>
@@ -16,8 +17,9 @@
         <tbody>
         {% for schedule in schedules%}
         <tr>
-            <td> {{schedule.class_id}}</td>
-            <td> {{schedule.discipline_id}}</td>
+{#            <td> {{schedule.class_id}}</td>#}
+{#            <td> {{schedule.discipline_id}}</td>#}
+            <td> {{schedule.discipline_name}}</td>
             <td> {{schedule.lecture_hall}}</td>
             <td> {{schedule.class_date}}</td>
             <td>

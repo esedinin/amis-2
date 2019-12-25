@@ -7,16 +7,22 @@
     <table class="table">
         <thead>
         <tr>
-            <th scope="col">student id</th> {# try without showing attendance_id #}
-            <th scope="col">class id</th>
+{#            <th scope="col">student id</th> {# try without showing attendance_id #}
+{#            <th scope="col">class id</th>#}
+            <th scope="col">student name</th>
+            <th scope="col">discipline name</th>
+            <th scope="col">class date</th>
             <th scope="col">attended</th>
         </tr>
         </thead>
         <tbody>
         {% for attendance in attendances%}
         <tr>
-            <td> {{attendance.student_id}}</td>
-            <td> {{attendance.class_id}}</td>
+{#            <td> {{attendance.student_id}}</td>#}
+{#            <td> {{attendance.class_id}}</td>#}
+            <td> {{attendance.student_name}}</td>
+            <td> {{attendance.discipline_name}}</td>
+            <td> {{attendance.class_date}}</td>
             <td> {{attendance.attended}}</td>
             <td>
                 <a href="/edit_attendance?attendance_id={{attendance.attendance_id}}" title="edit button">

@@ -6,7 +6,7 @@ from source.dao.orm.entities import Group
 db = PostgresDb()
 
 
-def update_groups_list():
+def get_student_groups():
     ch = []
     groups = sorted(list(db.sqlalchemy_session.query(Group.group_name).distinct()))
     pers = []
@@ -15,15 +15,17 @@ def update_groups_list():
     for i in range(len(groups)):
         tuple = groups[i][0], groups[i][0]
         ch.append(tuple)
-    print("TUPLE SHOULD BE RENEWED")
     return ch
 
-
-
-ch = update_groups_list()
-
-
 class StudentForm(Form):
+    @staticmethod
+    def reload_groups():
+        StudentForm.student_group = SelectField("Group: ", [
+        validators.DataRequired("Please enter student Group."),
+        ],
+                                choices=get_student_groups(), coerce=str)
+
+
     student_id = HiddenField()
 
     group_id = HiddenField()
@@ -36,15 +38,13 @@ class StudentForm(Form):
     student_group = SelectField("Group: ", [
         validators.DataRequired("Please enter student Group."),
         ],
-                                choices=ch, coerce=str)
+                                choices=get_student_groups(), coerce=str)
 
     student_university = StringField("university: ", [
-        validators.DataRequired("Please enter student university."),
-        validators.Length(3, 255, "Context should be from 3 to 255 symbols")])
+        validators.DataRequired("Please enter student university.")])
 
     student_faculty = StringField("faculty: ", [
-        validators.DataRequired("Please enter student faculty."),
-        validators.Length(3, 255, "Context should be from 3 to 255 symbols")])
+        validators.DataRequired("Please enter student faculty.")])
 
     house_id = IntegerField("house_id: ")
 

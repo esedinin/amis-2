@@ -44,7 +44,7 @@ class StudentSearchForm(Form):
 
         for uni, faculty in student_uni_and_faculty_set:
 
-            query = db.sqlalchemy_session.query(Student.student_group, func.count(Student.student_group)).group_by(
+            query = db.sqlalchemy_session.query(Student.student_group, func.count(Student.student_name)).group_by(
                 Student.student_group).filter(Student.student_university == uni, Student.student_faculty == faculty)
 
             if method == "POST":
