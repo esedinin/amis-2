@@ -1,14 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for
 from source.dao.orm.entities import *
-from source.dao.orm.populate import *
+# from source.dao.orm.populate import *
 from source.dao.db import PostgresDb
 from datetime import date
 from source.dao.data import *
 from sqlalchemy import func
 
-from source.forms.student_form import StudentForm
+from source.forms.student_form import *#StudentForm, update_groups_list
 from source.forms.group_form import GroupForm
-from source.forms.discipline_form import DisciplineForm
+from source.forms.discipline_form import *
 from source.forms.house_form import HouseForm
 from source.forms.search_student_form import StudentSearchForm
 from source.forms.schedule_form import ScheduleForm
@@ -80,6 +80,7 @@ def index_student():
 
 @app.route('/new_student', methods=['GET', 'POST'])
 def new_student():
+    ch = update_groups_list()
     form = StudentForm()
     db = PostgresDb()
 
@@ -105,6 +106,7 @@ def new_student():
 
 @app.route('/edit_student', methods=['GET', 'POST'])
 def edit_student():
+    ch = update_groups_list()
     form = StudentForm()
 
     if request.method == 'GET':
