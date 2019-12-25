@@ -7,18 +7,18 @@ db = PostgresDb()
 
 # Base.metadata.drop_all(db.sqlalchemy_engine)
 
-Base.metadata.create_all(db.sqlalchemy_engine)
+# Base.metadata.create_all(db.sqlalchemy_engine)
 
 session = db.sqlalchemy_session
 
 # TODO deleting all db after every deploy is not really good
 
-session.query(Attendance).delete()
-session.query(Schedule).delete()
-session.query(Discipline).delete()
-session.query(Student).delete()
-session.query(House).delete()
-session.query(Group).delete()
+# session.query(Attendance).delete()
+# session.query(Schedule).delete()
+# session.query(Discipline).delete()
+# session.query(Student).delete()
+# session.query(House).delete()
+# session.query(Group).delete()
 
 
 km_62 = Group(group_id=1, group_name='KM-62')
