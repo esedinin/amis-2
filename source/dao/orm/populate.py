@@ -6,6 +6,7 @@ db = PostgresDb()
 
 
 # Base.metadata.drop_all(db.sqlalchemy_engine)
+
 Base.metadata.create_all(db.sqlalchemy_engine)
 
 session = db.sqlalchemy_session
