@@ -27,16 +27,16 @@ def get_attendance_disciplines():
         ch.append(tuple)
     return ch
 
-def get_attendance_dates():
-    ch = []
-    dates = sorted(list(db.sqlalchemy_session.query(Schedule.class_date).distinct()))
-    pers = []
-    for i in range(len(dates)):
-        pers.append(dates[i][0])
-    for i in range(len(dates)):
-        tuple = dates[i][0], dates[i][0]
-        ch.append(tuple)
-    return ch
+# def get_attendance_dates():
+#     ch = []
+#     dates = sorted(list(db.sqlalchemy_session.query(Schedule.class_date).distinct()))
+#     pers = []
+#     for i in range(len(dates)):
+#         pers.append(dates[i][0])
+#     for i in range(len(dates)):
+#         tuple = dates[i][0], dates[i][0]
+#         ch.append(tuple)
+#     return ch
 
 class AttendanceForm(Form):
     @staticmethod
@@ -51,11 +51,9 @@ class AttendanceForm(Form):
             validators.DataRequired("Please enter discipline."),
         ], choices=get_attendance_disciplines(), coerce=str)
 
-    @staticmethod
-    def reload_dates():
-        AttendanceForm.class_date = SelectField("Date: ", [
-            validators.DataRequired("Please enter date."),
-        ], choices=get_attendance_dates(), coerce=str)
+    # @staticmethod
+    # def reload_dates():
+    #     AttendanceForm.class_date = DateField("Date: ", [validators.DataRequired("Please enter discipline name.")], format='%Y-%m-%d')
 
     attendance_id = HiddenField()
     student_id = HiddenField()

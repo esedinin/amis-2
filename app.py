@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 # from source.dao.orm.populate import *
 from datetime import date
 from source.dao.data import *
+from source.dao.orm.entities import *
 from sqlalchemy import func, and_
 
 import plotly
@@ -11,7 +12,7 @@ from source.forms.student_form import *
 from source.forms.group_form import GroupForm
 from source.forms.discipline_form import *
 from source.forms.house_form import HouseForm
-from source.forms.search_student_form import StudentSearchForm
+from source.forms.student_attendance_form import StudentSearchForm
 from source.forms.schedule_form import ScheduleForm
 from source.forms.attendance_form import AttendanceForm
 from source.forms.search_form import SearchForm
@@ -21,6 +22,7 @@ import plotly
 import plotly.graph_objs as go
 import os
 from connection import db
+from data_analysis import predict
 
 # Base.metadata.create_all(db.sqlalchemy_engine)
 
@@ -34,6 +36,11 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 @app.route('/', methods=['GET', 'POST'])
 def root():
     return render_template('index.html')
+
+@app.route('/correlation', methods = ['GET', 'POST'])
+def attendance_discipline_correlation():
+    result = predict()
+    return render_template("correlation.html", result=result)
 
 @app.route('/try', methods=['POST', 'GET'])
 def group_attendance():
@@ -89,25 +96,25 @@ def group_attendance():
 
 @app.route('/try2', methods=['POST', 'GET'])
 def student_attendance():
-    form = SearchForm()
+    form = StudentSearchForm()
     if request.method == 'POST':
         if not form.validate():
-            return render_template("search_by_group.html", form=form, action="try", form_name="Search students")
+            return render_template("search_by_student.html", form=form, action="try2", form_name="Search students")
         else:
-            group_parameter = form.group.data
-            print(group_parameter)
+            student_parameter = form.student.data
+            print(student_parameter)
 
             result = db.sqlalchemy_session.query(Discipline.discipline_name, func.count(Student.student_id).filter(Attendance.attended))\
                 .join(Schedule, Discipline.discipline_id == Schedule.discipline_id).\
                 join(Attendance, Schedule.class_id == Attendance.class_id).\
                 join(Student, Student.student_id == Attendance.student_id).group_by(Discipline.discipline_name)\
-                .filter(Student.student_group == group_parameter)
+                .filter(Student.student_name == student_parameter)
 
             for row in result:
                 print(row)
-            disciplines = dict((group, count) for group, count in result)
+            disciplines = dict((student, count) for student, count in result)
             print(disciplines)
-            disciplines_invert = dict((count, group) for group, count in result)
+            disciplines_invert = dict((count, student) for student, count in result)
             print(disciplines_invert)
             maxkey = disciplines_invert[max(disciplines.values())]
             print(max(disciplines.values()), 'and its key ', maxkey)
@@ -121,7 +128,7 @@ def student_attendance():
             x.append('Total classes per student')
             print(x)
             for row in db.sqlalchemy_session.query(func.count(Student.student_id))\
-                .join(Attendance, Student.student_id == Attendance.student_id).filter(Student.student_group == group_parameter):
+                .join(Attendance, Student.student_id == Attendance.student_id).filter(Student.student_name == student_parameter):
 
                 y.append(row[0])
             print(y)
@@ -135,9 +142,9 @@ def student_attendance():
             graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 
             bar = graphJSON
-            return render_template('graphics_student.html', plot=bar, group=group_parameter)
+            return render_template('graphics_student.html', plot=bar, student=student_parameter)
 
-    return render_template("search_by_student.html", form=form, action="try", form_name="Search attendance in groups")
+    return render_template("search_by_student.html", form=form, action="try2", form_name="Search attendance in groups")
 # STUDENT ORIENTED QUERIES --------------------------------------------------------------------------------------------
 
 
@@ -456,7 +463,7 @@ def new_schedule():
                 class_date=form.class_date.data)
             db.sqlalchemy_session.add(schedule_obj)
             db.sqlalchemy_session.commit()
-            AttendanceForm.reload_dates()
+            # AttendanceForm.reload_dates()
 
             return redirect(url_for('index_schedule'))
 
@@ -495,7 +502,7 @@ def edit_schedule():
             schedule.class_date = form.class_date.data
 
             db.sqlalchemy_session.commit()
-            AttendanceForm.reload_dates()
+            # AttendanceForm.reload_dates()
 
             return redirect(url_for('index_schedule'))
 
@@ -510,7 +517,7 @@ def delete_schedule():
 
     db.sqlalchemy_session.delete(result)
     db.sqlalchemy_session.commit()
-    AttendanceForm.reload_dates()
+    # AttendanceForm.reload_dates()
 
     return redirect(url_for('index_schedule'))
 
@@ -550,9 +557,6 @@ def new_attendance():
                 discipline_name=form.discipline_name.data,
                 class_date=form.class_date.data,
                 attended=form.attended.data)
-            print(attendance_obj)
-            print((attendance_obj.discipline_name))
-            print((attendance_obj.class_date ))
 
             db.sqlalchemy_session.add(attendance_obj)
             db.sqlalchemy_session.commit()
@@ -581,23 +585,24 @@ def edit_attendance():
         form.class_date.data = attendance.class_date
         form.attended.data = attendance.attended
 
-        return render_template('attendance_form.html', form=form, form_name="Edit attendance", action="edit_attendance")
+        return render_template('attendance_form.html', form=form, form_name="Edit attendance (change only check!)", action="edit_attendance")
 
     else:
 
         if not form.validate():
-            return render_template('attendance_form.html', form=form, form_name="Edit attendance", action="edit_attendance")
+            return render_template('attendance_form.html', form=form, form_name="Edit attendance (change only check!)", action="edit_attendance")
         else:
 
             # find attendance
             attendance = db.sqlalchemy_session.query(Attendance).filter(Attendance.attendance_id == form.attendance_id.data).one()
 
             # update fields from form data
-            attendance.attendance_id = form.attendance_id.data
-            attendance.student_id = db.sqlalchemy_session.query(Student.student_id).filter(Student.student_name == form.student_name.data),
+            attendance.attendance_id = form.attendance_id.data,
+            attendance.student_id = form.student_id.data,
             attendance.student_name = form.student_name.data,
-            attendance.class_id = db.sqlalchemy_session.query(Schedule.class_id).filter(and_(Schedule.discipline_name == form.discipline_name, Schedule.class_date == form.class_date)),
+            attendance.class_id = form.class_id.data,
             attendance.discipline_name = form.discipline_name.data,
+            attendance.class_date = form.class_date.data,
             attendance.attended = form.attended.data
 
             db.sqlalchemy_session.commit()
