@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from source.dao.orm.entities import *
-# from source.dao.orm.populate import *
+from source.dao.orm.populate import *
 from source.dao.db import PostgresDb
 from datetime import date
 from source.dao.data import *
@@ -421,6 +421,7 @@ def edit_discipline():
 
             db.sqlalchemy_session.commit()
             AttendanceForm.reload_disciplines()
+            ScheduleForm.reload_disciplines()
             return redirect(url_for('index_discipline'))
 
 
@@ -435,6 +436,7 @@ def delete_discipline():
     db.sqlalchemy_session.delete(result)
     db.sqlalchemy_session.commit()
     AttendanceForm.reload_disciplines()
+    ScheduleForm.reload_disciplines()
 
     return redirect(url_for('index_discipline'))
 
