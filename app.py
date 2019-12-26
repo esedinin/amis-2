@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-# from source.dao.orm.populate import *
+from source.dao.orm.populate import *
 from datetime import date
 from source.dao.data import *
 from sqlalchemy import func, and_
