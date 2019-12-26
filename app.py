@@ -20,10 +20,9 @@ import json
 import plotly
 import plotly.graph_objs as go
 import os
+from connection import db
 
-db = PostgresDb()
 # Base.metadata.create_all(db.sqlalchemy_engine)
-
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "jkm-vsnej9l-vm9sqm3:lmve")
@@ -144,8 +143,6 @@ def student_attendance():
 
 @app.route('/student', methods=['GET'])
 def index_student():
-    db = PostgresDb()
-
     deleted = request.args.get('deleted')
 
     if deleted:

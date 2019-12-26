@@ -2,9 +2,8 @@ from flask_wtf import Form
 from wtforms import SelectField, SubmitField, BooleanField
 from sqlalchemy import func
 from source.dao.orm.entities import *
-from source.dao.db import *
+from connection import db
 
-db = PostgresDb
 class StudentSearchForm(Form):
     name = SelectField("name:", choices=[("", "---")])
     group = SelectField("group:", choices=[("", "---")])

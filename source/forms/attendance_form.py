@@ -3,7 +3,7 @@ from wtforms import SubmitField, BooleanField, HiddenField, SelectField, DateFie
 from wtforms import validators
 from source.dao.db import *
 from source.dao.orm.entities import *
-db = PostgresDb()
+from connection import db
 
 def get_attendance_students():
     ch = []

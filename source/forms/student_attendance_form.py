@@ -2,9 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import SubmitField, HiddenField, SelectField
 from wtforms import validators
 from source.dao.orm.entities import *
-from source.dao.db import *
+from connection import db
 
-db = PostgresDb()
 
 def get_search_students():
     ch = []

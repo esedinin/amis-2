@@ -1,10 +1,8 @@
 from flask_wtf import Form
 from wtforms import StringField, SubmitField, DateField, HiddenField, SelectField
 from wtforms import validators
-from source.dao.orm.entities import *
-from source.dao.db import *
 from source.dao.orm.entities import Group
-db = PostgresDb()
+from connection import db
 
 def get_discipline_groups():
     ch = []

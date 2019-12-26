@@ -1,8 +1,6 @@
 from source.dao.orm.entities import *
-from source.dao.db import PostgresDb
+from connection import db
 import datetime
-
-db = PostgresDb()
 
 
 # Base.metadata.drop_all(db.sqlalchemy_engine)

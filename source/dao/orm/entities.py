@@ -1,7 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean, MetaData, Table
 from sqlalchemy.orm import relationship
-
+from connection import db
 
 Base = declarative_base()
 
@@ -76,9 +76,7 @@ class House(Base):
 
 
 if __name__ == '__main__':
-    from source.dao.db import PostgresDb
 
-    db = PostgresDb()
     # Base.metadata.drop_all(db.sqlalchemy_engine)
     # Base.metadata.create_all(db.sqlalchemy_engine)
     print("Entities running")
