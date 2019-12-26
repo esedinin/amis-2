@@ -5,6 +5,7 @@ from source.dao.data import *
 from source.dao.orm.entities import *
 from sqlalchemy import func, and_
 
+
 import plotly
 import plotly.graph_objects as go
 
