@@ -23,9 +23,9 @@ def get_schedule_disciplines():
 
 class ScheduleForm(Form):
     @staticmethod
-    def reload_groups():
-        ScheduleForm.student_group = SelectField("Group: ", [
-            validators.DataRequired("Please enter student Group."),
+    def reload_disciplines():
+        ScheduleForm.discipline_name = SelectField("Discipline: ", [
+            validators.DataRequired("Please enter discipline name."),
         ],
                                                    choices=get_schedule_disciplines(), coerce=str)
 
@@ -35,7 +35,7 @@ class ScheduleForm(Form):
     #     validators.DataRequired("Please enter discipline id.")
     # ])
 
-    discipline_name = SelectField("discipline name: ", [
+    discipline_name = SelectField("Discipline: ", [
         validators.DataRequired("Please enter discipline name."),
         ],
                                 choices=get_schedule_disciplines(), coerce=str)

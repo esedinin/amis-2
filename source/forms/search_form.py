@@ -1,10 +1,9 @@
-from flask_wtf import Form, FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, DateField, HiddenField, IntegerField, SelectField
+from flask_wtf import FlaskForm
+from wtforms import SubmitField, HiddenField, SelectField
 from wtforms import validators
 
 from source.dao import db
 from source.dao.db import PostgresDb
-from source.dao.orm.entities import Student
 from source.dao.orm.entities import Group
 
 db = PostgresDb()

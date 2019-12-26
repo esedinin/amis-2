@@ -39,7 +39,7 @@ def root():
     return render_template('index.html')
 
 @app.route('/try', methods=['POST', 'GET'])
-def some_query():
+def group_attendance():
     form = SearchForm()
     if request.method == 'POST':
         if not form.validate():
@@ -47,22 +47,18 @@ def some_query():
         else:
             group_parameter = form.group.data
             print(group_parameter)
-            result = db.sqlalchemy_session.query(Group.group_name, func.count(Discipline.discipline_name))\
-                .join(Group, Group.group_name == Discipline.discipline_group).\
-                join(Student, Student.group_id == Group.group_id).group_by(Group.group_name)
-            # .filter(Student.student_group == group_parameter)\ try without filter
-            #TODO I NEED TO FILTER BY STUDENT
-            result2 = db.sqlalchemy_session.query(Discipline.discipline_name, func.count(Student.student_id).filter(Attendance.attended))\
+
+            result = db.sqlalchemy_session.query(Discipline.discipline_name, func.count(Student.student_id).filter(Attendance.attended))\
                 .join(Schedule, Discipline.discipline_id == Schedule.discipline_id).\
                 join(Attendance, Schedule.class_id == Attendance.class_id).\
                 join(Student, Student.student_id == Attendance.student_id).group_by(Discipline.discipline_name)\
                 .filter(Student.student_group == group_parameter)
 
-            for row in result2:
+            for row in result:
                 print(row)
-            disciplines = dict((group, count) for group, count in result2)
+            disciplines = dict((group, count) for group, count in result)
             print(disciplines)
-            disciplines_invert = dict((count, group) for group, count in result2)
+            disciplines_invert = dict((count, group) for group, count in result)
             print(disciplines_invert)
             maxkey = disciplines_invert[max(disciplines.values())]
             print(max(disciplines.values()), 'and its key ', maxkey)
@@ -90,11 +86,65 @@ def some_query():
             graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 
             bar = graphJSON
-            return render_template('graphics.html', plot=bar, group=group_parameter)
+            return render_template('graphics_group.html', plot=bar, group=group_parameter)
 
     return render_template("search_by_group.html", form=form, action="try", form_name="Serach disciplines in groups")
 
+@app.route('/try2', methods=['POST', 'GET'])
+def student_attendance():
+    form = SearchForm()
+    if request.method == 'POST':
+        if not form.validate():
+            return render_template("search_by_group.html", form=form, action="try", form_name="Search students")
+        else:
+            group_parameter = form.group.data
+            print(group_parameter)
+            result = db.sqlalchemy_session.query(Group.group_name, func.count(Discipline.discipline_name))\
+                .join(Group, Group.group_name == Discipline.discipline_group).\
+                join(Student, Student.group_id == Group.group_id).group_by(Group.group_name)
+            # .filter(Student.student_group == group_parameter)\ try without filter
+            #TODO I NEED TO FILTER BY STUDENT
+            result = db.sqlalchemy_session.query(Discipline.discipline_name, func.count(Student.student_id).filter(Attendance.attended))\
+                .join(Schedule, Discipline.discipline_id == Schedule.discipline_id).\
+                join(Attendance, Schedule.class_id == Attendance.class_id).\
+                join(Student, Student.student_id == Attendance.student_id).group_by(Discipline.discipline_name)\
+                .filter(Student.student_group == group_parameter)
 
+            for row in result:
+                print(row)
+            disciplines = dict((group, count) for group, count in result)
+            print(disciplines)
+            disciplines_invert = dict((count, group) for group, count in result)
+            print(disciplines_invert)
+            maxkey = disciplines_invert[max(disciplines.values())]
+            print(max(disciplines.values()), 'and its key ', maxkey)
+
+            x = []
+            y = []
+            for a in disciplines.keys():
+                x.append(a)
+            for b in disciplines.values():
+                y.append(b)
+            x.append('Total classes per student')
+            print(x)
+            for row in db.sqlalchemy_session.query(func.count(Student.student_id))\
+                .join(Attendance, Student.student_id == Attendance.student_id).filter(Student.student_group == group_parameter):
+
+                y.append(row[0])
+            print(y)
+            data = [
+                go.Bar(
+                    x=x,  # assign x as the dataframe column 'x'
+                    y=y
+                )
+            ]
+
+            graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+
+            bar = graphJSON
+            return render_template('graphics_student.html', plot=bar, group=group_parameter)
+
+    return render_template("search_by_student.html", form=form, action="try", form_name="Search attendance in groups")
 # STUDENT ORIENTED QUERIES --------------------------------------------------------------------------------------------
 
 
@@ -331,6 +381,7 @@ def new_discipline():
             db.sqlalchemy_session.add(discipline_obj)
             db.sqlalchemy_session.commit()
             AttendanceForm.reload_disciplines()
+            ScheduleForm.reload_disciplines()
 
             return redirect(url_for('index_discipline'))
 
