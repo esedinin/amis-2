@@ -1,12 +1,10 @@
 from flask_wtf import Form
-from wtforms import StringField, SubmitField, HiddenField, IntegerField, DateField, SelectField
+from wtforms import StringField, SubmitField, HiddenField, DateField, SelectField
 from wtforms import validators
+from source.dao.db import *
+from source.dao.orm.entities import *
 
-from source.dao.db import PostgresDb
-from source.dao.orm.entities import Discipline
-
-db = PostgresDb()
-
+db=PostgresDb()
 
 
 def get_schedule_disciplines():

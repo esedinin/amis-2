@@ -1,7 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from source.dao.orm.entities import *
 # from source.dao.orm.populate import *
-from source.dao.db import PostgresDb
 from datetime import date
 from source.dao.data import *
 from sqlalchemy import func, and_
@@ -17,7 +15,7 @@ from source.forms.search_student_form import StudentSearchForm
 from source.forms.schedule_form import ScheduleForm
 from source.forms.attendance_form import AttendanceForm
 from source.forms.search_form import SearchForm
-
+from source.dao.db import *
 import json
 import plotly
 import plotly.graph_objs as go
@@ -99,11 +97,7 @@ def student_attendance():
         else:
             group_parameter = form.group.data
             print(group_parameter)
-            result = db.sqlalchemy_session.query(Group.group_name, func.count(Discipline.discipline_name))\
-                .join(Group, Group.group_name == Discipline.discipline_group).\
-                join(Student, Student.group_id == Group.group_id).group_by(Group.group_name)
-            # .filter(Student.student_group == group_parameter)\ try without filter
-            #TODO I NEED TO FILTER BY STUDENT
+
             result = db.sqlalchemy_session.query(Discipline.discipline_name, func.count(Student.student_id).filter(Attendance.attended))\
                 .join(Schedule, Discipline.discipline_id == Schedule.discipline_id).\
                 join(Attendance, Schedule.class_id == Attendance.class_id).\
@@ -166,7 +160,7 @@ def index_student():
 @app.route('/new_student', methods=['GET', 'POST'])
 def new_student():
     form = StudentForm()
-    db = PostgresDb()
+
     if request.method == 'POST':
         if not form.validate():
             return render_template('student_form.html', form=form, form_name="New student", action="new_student")
@@ -196,7 +190,6 @@ def edit_student():
     if request.method == 'GET':
 
         student_id = request.args.get('student_id')
-        db = PostgresDb()
         student = db.sqlalchemy_session.query(Student).filter(Student.student_id == student_id).one()
 
         # fill form and send to student
@@ -213,7 +206,6 @@ def edit_student():
         if not form.validate():
             return render_template('student_form.html', form=form, form_name="Edit student", action="edit_student")
         else:
-            db = PostgresDb()
             # find student
             student = db.sqlalchemy_session.query(Student).filter(Student.student_id == form.student_id.data).one()
 
@@ -235,7 +227,6 @@ def edit_student():
 def delete_student():
     student_id = request.args.get('student_id')
 
-    db = PostgresDb()
 
     result = db.sqlalchemy_session.query(Student).filter(Student.student_id == student_id).one()
     result.student_date_expelled = date.today()
@@ -253,7 +244,6 @@ def delete_student():
 
 @app.route('/group', methods=['GET'])
 def index_group():
-    db = PostgresDb()
 
     group = db.sqlalchemy_session.query(Group).all()
 
@@ -263,7 +253,7 @@ def index_group():
 @app.route('/new_group', methods=['GET', 'POST'])
 def new_group():
     form = GroupForm()
-    db = PostgresDb()
+
     if request.method == 'POST':
         if not form.validate():
             return render_template('group_form.html', form=form, form_name="New group",
@@ -274,7 +264,6 @@ def new_group():
                 group_id = id + 1,
                 group_name=form.group_name.data)
 
-            db = PostgresDb()
             db.sqlalchemy_session.add(group_obj)
             db.sqlalchemy_session.commit()
             StudentForm.reload_groups()
@@ -293,7 +282,7 @@ def edit_group():
     if request.method == 'GET':
 
         group_id = request.args.get('group_id')
-        db = PostgresDb()
+
         group = db.sqlalchemy_session.query(Group).filter(Group.group_id == group_id).one()
 
         # fill form and send to group
@@ -307,7 +296,7 @@ def edit_group():
         if not form.validate():
             return render_template('group_form.html', form=form, form_name="Edit group", action="edit_group")
         else:
-            db = PostgresDb()
+
             # find group
             group = db.sqlalchemy_session.query(Group).filter(Group.group_id == form.group_id.data).one()
 
@@ -327,7 +316,7 @@ def edit_group():
 def delete_group():
     group_id = request.args.get('group_id')
 
-    db = PostgresDb()
+
 
     result = db.sqlalchemy_session.query(Group).filter(Group.group_id == group_id).one()
     result.group_date_expelled = date.today()
@@ -349,7 +338,6 @@ def delete_group():
 
 @app.route('/discipline', methods=['GET'])
 def index_discipline():
-    db = PostgresDb()
 
     deleted = request.args.get('deleted')
 
@@ -365,7 +353,6 @@ def index_discipline():
 @app.route('/new_discipline', methods=['GET', 'POST'])
 def new_discipline():
     form = DisciplineForm()
-    db = PostgresDb()
 
     if request.method == 'POST':
         if not form.validate():
@@ -395,7 +382,6 @@ def edit_discipline():
     if request.method == 'GET':
 
         discipline_id = request.args.get('discipline_id')
-        db = PostgresDb()
         discipline = db.sqlalchemy_session.query(Discipline).filter(Discipline.discipline_id == discipline_id).one()
 
         # fill form and send to discipline
@@ -410,7 +396,6 @@ def edit_discipline():
         if not form.validate():
             return render_template('discipline_form.html', form=form, form_name="Edit discipline", action="edit_discipline")
         else:
-            db = PostgresDb()
             # find discipline
             discipline = db.sqlalchemy_session.query(Discipline).filter(Discipline.discipline_id == form.discipline_id.data).one()
 
@@ -429,7 +414,6 @@ def edit_discipline():
 def delete_discipline():
     discipline_id = request.args.get('discipline_id')
 
-    db = PostgresDb()
 
     result = db.sqlalchemy_session.query(Discipline).filter(Discipline.discipline_id == discipline_id).one()
 
@@ -447,7 +431,6 @@ def delete_discipline():
 
 @app.route('/schedule', methods=['GET'])
 def index_schedule():
-    db = PostgresDb()
 
     deleted = request.args.get('deleted')
 
@@ -463,7 +446,6 @@ def index_schedule():
 @app.route('/new_schedule', methods=['GET', 'POST'])
 def new_schedule():
     form = ScheduleForm()
-    db = PostgresDb()
     if request.method == 'POST':
         if not form.validate():
             return render_template('schedule_form.html', form=form, form_name="New schedule", action="new_schedule")
@@ -491,7 +473,6 @@ def edit_schedule():
     if request.method == 'GET':
 
         class_id = request.args.get('class_id')
-        db = PostgresDb()
         schedule = db.sqlalchemy_session.query(Schedule).filter(Schedule.class_id == class_id).one()
 
         # fill form and send to schedule
@@ -507,7 +488,6 @@ def edit_schedule():
         if not form.validate():
             return render_template('schedule_form.html', form=form, form_name="Edit schedule", action="edit_schedule")
         else:
-            db = PostgresDb()
             # find schedule
             schedule = db.sqlalchemy_session.query(Schedule).filter(Schedule.class_id == form.class_id.data).one()
 
@@ -527,7 +507,6 @@ def edit_schedule():
 def delete_schedule():
     class_id = request.args.get('class_id')
 
-    db = PostgresDb()
 
     result = db.sqlalchemy_session.query(Schedule).filter(Schedule.class_id == class_id).one()
     # result.student_date_expelled = date.today() TODO delete this if acceptable
@@ -545,7 +524,6 @@ def delete_schedule():
 
 @app.route('/attendance', methods=['GET'])
 def index_attendance():
-    db = PostgresDb()
 
     deleted = request.args.get('deleted')
 
@@ -561,7 +539,6 @@ def index_attendance():
 @app.route('/new_attendance', methods=['GET', 'POST'])
 def new_attendance():
     form = AttendanceForm()
-    db = PostgresDb()
     print(form.discipline_name.data)
     if request.method == 'POST':
         if not form.validate():
@@ -595,7 +572,7 @@ def edit_attendance():
     if request.method == 'GET':
 
         attendance_id = request.args.get('attendance_id')
-        db = PostgresDb()
+
         attendance = db.sqlalchemy_session.query(Attendance).filter(Attendance.attendance_id == attendance_id).one()
 
         # fill form and send to attendance
@@ -614,7 +591,7 @@ def edit_attendance():
         if not form.validate():
             return render_template('attendance_form.html', form=form, form_name="Edit attendance", action="edit_attendance")
         else:
-            db = PostgresDb()
+
             # find attendance
             attendance = db.sqlalchemy_session.query(Attendance).filter(Attendance.attendance_id == form.attendance_id.data).one()
 
@@ -635,7 +612,6 @@ def edit_attendance():
 def delete_attendance():
     attendance_id = request.args.get('attendance_id')
 
-    db = PostgresDb()
 
     result = db.sqlalchemy_session.query(Attendance).filter(Attendance.attendance_id == attendance_id).one()
     # result.student_date_expelled = date.today() TODO delete this if acceptable
@@ -652,7 +628,6 @@ def delete_attendance():
 
 @app.route('/house', methods=['GET'])
 def index_house():
-    db = PostgresDb()
 
     deleted = request.args.get('deleted')
 
@@ -668,7 +643,6 @@ def index_house():
 @app.route('/new_house', methods=['GET', 'POST'])
 def new_house():
     form = HouseForm()
-    db = PostgresDb()
 
     if request.method == 'POST':
         if not form.validate():
@@ -697,7 +671,7 @@ def edit_house():
     if request.method == 'GET':
 
         house_id = request.args.get('house_id')
-        db = PostgresDb()
+
         house = db.sqlalchemy_session.query(House).filter(House.house_id == house_id).one()
 
         # fill form and send to house
@@ -714,7 +688,7 @@ def edit_house():
         if not form.validate():
             return render_template('house_form.html', form=form, form_name="Edit house", action="edit_house")
         else:
-            db = PostgresDb()
+
             # find house
             house = db.sqlalchemy_session.query(House).filter(House.house_id == form.house_id.data).one()
 
@@ -734,7 +708,6 @@ def edit_house():
 def delete_house():
     house_id = request.args.get('house_id')
 
-    db = PostgresDb()
 
     result = db.sqlalchemy_session.query(House).filter(House.house_id == house_id).one()
 

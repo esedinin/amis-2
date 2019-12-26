@@ -1,11 +1,10 @@
 from flask_wtf import Form
 from wtforms import SubmitField, BooleanField, HiddenField, SelectField, DateField, StringField
 from wtforms import validators
-from source.dao.db import PostgresDb
-from source.dao.orm.entities import Student
-from source.dao.orm.entities import Schedule
-from source.dao.orm.entities import Discipline
+from source.dao.db import *
+from source.dao.orm.entities import *
 db = PostgresDb()
+
 def get_attendance_students():
     ch = []
     students = sorted(list(db.sqlalchemy_session.query(Student.student_name).distinct()))

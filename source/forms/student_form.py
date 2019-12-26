@@ -1,11 +1,10 @@
 from flask_wtf import Form
 from wtforms import StringField, SubmitField, HiddenField, IntegerField, SelectField
 from wtforms import validators
-from source.dao.db import PostgresDb
 from source.dao.orm.entities import Group
+from source.dao.db import *
+
 db = PostgresDb()
-
-
 def get_student_groups():
     ch = []
     groups = sorted(list(db.sqlalchemy_session.query(Group.group_name).distinct()))

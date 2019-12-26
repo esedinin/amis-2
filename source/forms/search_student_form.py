@@ -1,10 +1,10 @@
 from flask_wtf import Form
 from wtforms import SelectField, SubmitField, BooleanField
 from sqlalchemy import func
-from source.dao.db import PostgresDb
-from source.dao.orm.entities import Student
+from source.dao.orm.entities import *
+from source.dao.db import *
 
-
+db = PostgresDb
 class StudentSearchForm(Form):
     name = SelectField("name:", choices=[("", "---")])
     group = SelectField("group:", choices=[("", "---")])
@@ -13,7 +13,6 @@ class StudentSearchForm(Form):
     submit = SubmitField("Search")
 
     def init(self):
-        db = PostgresDb()
 
         self.name.choices = [("", "---")] + [(i[0], i[0]) for i in list(
             db.sqlalchemy_session.query(Student.student_name).distinct(Student.student_name).all())]
@@ -28,7 +27,6 @@ class StudentSearchForm(Form):
             db.sqlalchemy_session.query(Student.student_faculty).distinct(Student.student_faculty).all())]
 
     def search(self, method):
-        db = PostgresDb()
         result, labels = [], []
 
         query = db.sqlalchemy_session.query(Student.student_university, Student.student_faculty).distinct(
